@@ -1986,6 +1986,7 @@ function submitOrder() {
   };
 
   allOrders.push(order);
+  scheduleSave();
   currentOrderItems = [];
 
   // Reset form
@@ -2340,6 +2341,7 @@ function saveEditOrder() {
   };
 
   editItems = [];
+  scheduleSave();
   closeEditModal();
   renderOrdersTable();
   showToast('✓ Order updated');
@@ -2373,6 +2375,7 @@ function closeDeleteConfirm() {
 function executeDelete() {
   if (!deletingOrderId) return;
   allOrders = allOrders.filter(x => x.id !== deletingOrderId);
+  scheduleSave();
   closeDeleteConfirm();
   renderOrdersTable();
   showToast('Order deleted');
