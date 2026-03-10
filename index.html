@@ -1,0 +1,3119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D.A.T.E. PR Event Order System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f6f6f6;
+    --warm-white: #ffffff;
+    --stone: #aaaaaa;
+    --taupe: #888888;
+    --bark: #555555;
+    --earth: #1c1c1c;
+    --sage: #777777;
+    --sand: #e0e0e0;
+    --accent: #444444;
+    --light-sand: #eeeeee;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--warm-white);
+    color: var(--earth);
+    min-height: 100vh;
+    font-weight: 300;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--earth);
+    color: var(--cream);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+  }
+  .header-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    letter-spacing: 6px;
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+  .header-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--stone);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .header-right { display: flex; gap: 12px; align-items: center; }
+
+  .tab-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--stone);
+    padding: 8px 18px;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* MAIN VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ===================== ORDER FORM ===================== */
+  .order-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    min-height: calc(100vh - 65px);
+  }
+
+  .product-panel {
+    padding: 32px 36px;
+    background: var(--warm-white);
+    border-right: 1px solid var(--light-sand);
+  }
+
+  .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: var(--earth);
+    margin-bottom: 6px;
+  }
+  .panel-subtitle {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--taupe);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .search-bar {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--sand);
+    background: var(--cream);
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    color: var(--earth);
+    border-radius: 3px;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar:focus { border-color: var(--accent); }
+  .search-bar::placeholder { color: var(--stone); }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 16px;
+  }
+
+  .product-card {
+    background: white;
+    border: 1px solid var(--light-sand);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .product-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+
+  .product-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--stone);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .product-img-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #f6f6f6 0%, #eeeeee 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--taupe);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    gap: 8px;
+  }
+  .product-img-placeholder svg { opacity: 0.3; }
+
+  .product-info {
+    padding: 12px 14px 14px;
+  }
+  .product-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--earth);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .product-code {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--stone);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .product-price {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+
+  /* Product Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: white;
+    width: 520px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #f6f6f6 0%, #eeeeee 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--taupe);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .modal-img img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-body { padding: 24px 28px 28px; }
+  .modal-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--earth);
+    margin-bottom: 4px;
+  }
+  .modal-code {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--taupe);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .modal-price {
+    font-size: 18px;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-weight: 400;
+  }
+
+  .size-chart {
+    background: var(--cream);
+    border-radius: 4px;
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  .size-chart-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 10px;
+  }
+  .size-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .size-chip {
+    padding: 5px 10px;
+    border: 1px solid var(--sand);
+    font-size: 11px;
+    color: var(--bark);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .size-chip:hover, .size-chip.selected {
+    background: var(--earth);
+    color: white;
+    border-color: var(--earth);
+  }
+
+  .modal-field { margin-bottom: 14px; }
+  .modal-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .modal-select, .modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--sand);
+    background: var(--cream);
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    color: var(--earth);
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-select:focus, .modal-input:focus { border-color: var(--accent); }
+
+  .deposit-options {
+    display: flex;
+    gap: 8px;
+  }
+  .deposit-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--sand);
+    background: white;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    color: var(--bark);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .deposit-btn:hover, .deposit-btn.selected {
+    background: var(--earth);
+    border-color: var(--earth);
+    color: white;
+  }
+
+  .add-to-order-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--earth);
+    color: var(--cream);
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .add-to-order-btn:hover { background: var(--accent); }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* ORDER SIDEBAR */
+  .order-sidebar {
+    background: var(--earth);
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    overflow: hidden;
+  }
+
+  .sidebar-top {
+    padding: 28px 24px 0;
+    flex-shrink: 0;
+  }
+  .sidebar-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  .customer-fields { }
+  .cfield {
+    margin-bottom: 10px;
+  }
+  .cfield label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--stone);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .cfield input, .cfield select, .cfield textarea {
+    width: 100%;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--cream);
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cfield input:focus, .cfield select:focus, .cfield textarea:focus {
+    border-color: var(--accent);
+  }
+  .cfield select option { background: var(--earth); color: var(--cream); }
+  .cfield input::placeholder { color: rgba(255,255,255,0.3); }
+
+  .cfield-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 16px 0;
+  }
+
+  .order-items-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 10px;
+    flex-shrink: 0;
+    padding: 0 24px;
+  }
+
+  .order-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 24px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bark) transparent;
+  }
+
+  .order-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 3px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .order-item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--cream);
+    margin-bottom: 3px;
+    padding-right: 20px;
+  }
+  .order-item-details {
+    font-size: 10px;
+    color: var(--stone);
+    letter-spacing: 1px;
+  }
+  .order-item-price {
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 4px;
+  }
+  .order-item-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--stone);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px;
+    transition: color 0.15s;
+  }
+  .order-item-remove:hover { color: #e07070; }
+
+  .empty-order {
+    text-align: center;
+    color: var(--stone);
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 30px 0;
+    opacity: 0.6;
+  }
+
+  .sidebar-bottom {
+    padding: 16px 24px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+
+  .order-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .total-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--stone);
+  }
+  .total-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: var(--cream);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: var(--taupe); }
+
+  /* ===================== ORDERS VIEW ===================== */
+  .orders-view { padding: 36px 40px; }
+  .view-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .view-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: 2px;
+  }
+  .view-count {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--taupe);
+    text-transform: uppercase;
+  }
+
+  .export-btns { display: flex; gap: 10px; }
+  .export-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--sand);
+    background: white;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bark);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .export-btn:hover, .export-btn.primary {
+    background: var(--earth);
+    border-color: var(--earth);
+    color: white;
+  }
+
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .orders-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    border-bottom: 1px solid var(--light-sand);
+    font-weight: 400;
+  }
+  .orders-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--light-sand);
+    color: var(--earth);
+    vertical-align: top;
+  }
+  .orders-table tr:hover td { background: var(--cream); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .badge-70 { background: #e8e8e8; color: #333; }
+  .badge-50 { background: #ddd; color: #444; }
+  .badge-30 { background: #ccc; color: #555; }
+  .badge-na { background: #e8e8e8; color: #444; }
+
+  /* ===================== DASHBOARD ===================== */
+  .dashboard-view { padding: 36px 40px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--light-sand);
+    border-radius: 4px;
+    padding: 20px 22px;
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: var(--earth);
+  }
+  .stat-sub {
+    font-size: 10px;
+    color: var(--stone);
+    margin-top: 4px;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .dash-card {
+    background: white;
+    border: 1px solid var(--light-sand);
+    border-radius: 4px;
+    padding: 22px 24px;
+  }
+  .dash-card-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 18px;
+  }
+
+  .product-rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .rank-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--stone);
+    width: 24px;
+  }
+  .rank-bar-wrap { flex: 1; }
+  .rank-name {
+    font-size: 11px;
+    color: var(--earth);
+    margin-bottom: 4px;
+  }
+  .rank-bar {
+    height: 4px;
+    background: var(--light-sand);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .rank-bar-fill {
+    height: 100%;
+    background: #444;
+    border-radius: 2px;
+    transition: width 0.8s ease;
+  }
+  .rank-count {
+    font-size: 11px;
+    color: var(--taupe);
+    min-width: 30px;
+    text-align: right;
+  }
+
+  .deposit-donut { text-align: center; padding: 10px 0; }
+  .deposit-bars { }
+  .dep-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .dep-label { font-size: 11px; color: var(--earth); width: 40px; }
+  .dep-bar-wrap { flex: 1; height: 8px; background: var(--light-sand); border-radius: 4px; overflow: hidden; }
+  .dep-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .dep-70 { background: #555; }
+  .dep-50 { background: #333; }
+  .dep-30 { background: #888; }
+  .dep-count { font-size: 11px; color: var(--taupe); min-width: 20px; text-align: right; }
+
+
+  /* Category filter buttons */
+  .cat-btn {
+    padding: 7px 18px;
+    border: 1px solid var(--sand);
+    background: white;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bark);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .cat-btn.active, .cat-btn:hover {
+    background: var(--earth);
+    border-color: var(--earth);
+    color: white;
+  }
+
+  /* Edit Order Modal */
+  .edit-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .edit-modal-overlay.open { display: flex; }
+  .edit-modal {
+    background: white;
+    width: 680px;
+    max-width: 96vw;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .edit-modal-header {
+    background: var(--earth);
+    color: var(--cream);
+    padding: 20px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .edit-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 2px;
+  }
+  .edit-modal-body { padding: 28px; }
+  .edit-section-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--light-sand);
+  }
+  .edit-field { margin-bottom: 12px; }
+  .edit-field label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--taupe);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .edit-field input, .edit-field select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--sand);
+    background: var(--cream);
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    color: var(--earth);
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .edit-field input:focus, .edit-field select:focus { border-color: var(--accent); }
+  .edit-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .edit-item-row {
+    background: var(--cream);
+    border: 1px solid var(--light-sand);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .edit-item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: var(--earth);
+    margin-bottom: 8px;
+    padding-right: 28px;
+  }
+  .edit-item-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .edit-item-controls select, .edit-item-controls input {
+    padding: 6px 10px;
+    border: 1px solid var(--sand);
+    background: white;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    color: var(--earth);
+    border-radius: 3px;
+    outline: none;
+  }
+  .edit-item-del {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: none;
+    border: none;
+    color: var(--stone);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.15s;
+  }
+  .edit-item-del:hover { color: #e07070; }
+  .edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--light-sand);
+  }
+  .edit-save-btn {
+    flex: 1;
+    padding: 12px;
+    background: var(--earth);
+    color: var(--cream);
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s;
+  }
+  .edit-save-btn:hover { background: var(--accent); }
+  .edit-cancel-btn {
+    padding: 12px 24px;
+    background: white;
+    color: var(--bark);
+    border: 1px solid var(--sand);
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .edit-cancel-btn:hover { border-color: var(--earth); color: var(--earth); }
+  .delete-confirm-btn {
+    padding: 12px 20px;
+    background: white;
+    color: #c0392b;
+    border: 1px solid #ddd;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .delete-confirm-btn:hover { background: #c0392b; color: white; border-color: #c0392b; }
+  .action-btn {
+    padding: 5px 10px;
+    border-radius: 2px;
+    font-family: 'Jost', sans-serif;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid;
+  }
+  .action-edit {
+    background: white;
+    color: var(--bark);
+    border-color: var(--sand);
+  }
+  .action-edit:hover { background: var(--earth); color: white; border-color: var(--earth); }
+  .action-delete {
+    background: white;
+    color: #c0392b;
+    border-color: #e8b4b0;
+  }
+  .action-delete:hover { background: #c0392b; color: white; border-color: #c0392b; }
+
+
+  /* ---- LOGIN SCREEN ---- */
+  .login-screen {
+    position: fixed; inset: 0;
+    background: #1c1c1c;
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-screen.hidden { display: none; }
+  .login-box {
+    text-align: center;
+    width: 320px;
+  }
+  .login-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; letter-spacing: 10px;
+    color: white; font-weight: 300;
+    margin-bottom: 6px;
+  }
+  .login-sub {
+    font-size: 9px; letter-spacing: 3px;
+    color: #666; text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .login-step { display: none; }
+  .login-step.active { display: block; }
+  .login-label {
+    font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; color: #888;
+    margin-bottom: 12px; display: block;
+  }
+  .login-select, .login-input {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #333;
+    color: white; font-family: 'Jost', sans-serif;
+    font-size: 14px; border-radius: 3px;
+    outline: none; text-align: center;
+    letter-spacing: 2px;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+  .login-select option { background: #1c1c1c; }
+  .login-input:focus { border-color: #888; }
+  .pin-dots {
+    display: flex; gap: 10px; justify-content: center;
+    margin-bottom: 20px;
+  }
+  .pin-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 1px solid #555; background: transparent;
+    transition: background 0.15s;
+  }
+  .pin-dot.filled { background: white; border-color: white; }
+  .pin-pad {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; max-width: 220px; margin: 0 auto 16px;
+  }
+  .pin-key {
+    padding: 14px; background: rgba(255,255,255,0.06);
+    border: 1px solid #333; color: white;
+    font-family: 'Jost', sans-serif; font-size: 16px;
+    cursor: pointer; border-radius: 3px;
+    transition: all 0.15s;
+  }
+  .pin-key:hover { background: rgba(255,255,255,0.14); border-color: #666; }
+  .pin-key.del { font-size: 12px; color: #888; }
+  .login-btn {
+    width: 100%; padding: 13px;
+    background: white; color: #1c1c1c;
+    border: none; font-family: 'Jost', sans-serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; cursor: pointer;
+    border-radius: 3px; transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .login-btn:hover { background: #ddd; }
+  .login-error {
+    color: #e07070; font-size: 11px;
+    letter-spacing: 1px; margin-top: 8px;
+    min-height: 18px;
+  }
+  .login-back {
+    background: none; border: none; color: #666;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+    margin-top: 12px; font-family: 'Jost', sans-serif;
+  }
+  .login-back:hover { color: #aaa; }
+
+  /* ---- EVENT BADGE in header ---- */
+  .event-badge {
+    background: rgba(255,255,255,0.1);
+    color: #ccc; font-size: 9px;
+    letter-spacing: 2px; padding: 4px 10px;
+    border-radius: 2px; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.15);
+    cursor: pointer;
+  }
+  .event-badge:hover { background: rgba(255,255,255,0.18); }
+
+  /* ---- LANGUAGE TOGGLE ---- */
+  .lang-toggle {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #aaa; font-size: 10px;
+    letter-spacing: 1px; padding: 6px 12px;
+    cursor: pointer; border-radius: 2px;
+    font-family: 'Jost', sans-serif;
+    transition: all 0.15s;
+  }
+  .lang-toggle:hover { background: rgba(255,255,255,0.18); color: white; }
+
+  /* ---- ORDER NOTES FIELD ---- */
+  .order-notes-wrap { padding: 0 24px; margin-bottom: 10px; }
+
+  /* ---- CUSTOMER SEARCH ---- */
+  .customer-search-wrap {
+    position: relative; margin-bottom: 10px;
+  }
+  .customer-suggestions {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: #2e2e2e; border: 1px solid #444;
+    border-radius: 3px; z-index: 50;
+    max-height: 160px; overflow-y: auto;
+    display: none;
+  }
+  .customer-suggestions.open { display: block; }
+  .suggestion-item {
+    padding: 9px 12px; font-size: 12px;
+    color: #ddd; cursor: pointer;
+    border-bottom: 1px solid #3a3a3a;
+    transition: background 0.1s;
+  }
+  .suggestion-item:hover { background: rgba(255,255,255,0.08); }
+  .suggestion-item span { font-size: 10px; color: #888; display: block; margin-top: 1px; }
+
+  /* ---- PRINT RECEIPT ---- */
+  @media print {
+    body > *:not(#receiptModal) { display: none !important; }
+    .edit-modal-overlay { display: block !important; position: static !important; background: none !important; }
+    .edit-modal { box-shadow: none !important; max-height: none !important; }
+    .receipt-no-print { display: none !important; }
+  }
+  .receipt-body { padding: 28px 32px; font-family: 'Jost', sans-serif; }
+  .receipt-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+  .receipt-brand { font-family: 'Cormorant Garamond', serif; font-size: 28px; letter-spacing: 8px; color: #1c1c1c; font-weight: 300; }
+  .receipt-event { font-size: 10px; letter-spacing: 2px; color: #888; text-transform: uppercase; margin-top: 4px; }
+  .receipt-section { margin-bottom: 18px; }
+  .receipt-section-title { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; margin-bottom: 8px; }
+  .receipt-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; }
+  .receipt-row:last-child { border: none; }
+  .receipt-item { padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+  .receipt-item-name { font-size: 13px; color: #1c1c1c; margin-bottom: 3px; }
+  .receipt-item-detail { font-size: 11px; color: #888; }
+  .receipt-total { display: flex; justify-content: space-between; padding: 14px 0 0; font-size: 15px; border-top: 2px solid #1c1c1c; margin-top: 8px; }
+  .receipt-footer { text-align: center; margin-top: 24px; font-size: 10px; color: #aaa; letter-spacing: 1px; }
+
+
+  /* ---- ADMIN PANEL ---- */
+  .admin-tab {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .admin-tab.active, .admin-tab:hover {
+    color: #1c1c1c;
+    border-bottom-color: #1c1c1c;
+  }
+  .admin-action-btn {
+    padding: 9px 18px;
+    background: #1c1c1c;
+    color: white;
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s;
+  }
+  .admin-action-btn:hover { background: #444; }
+  .admin-product-row {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    transition: box-shadow 0.15s;
+  }
+  .admin-product-row:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .admin-product-thumb {
+    width: 56px; height: 56px;
+    background: #f6f6f6;
+    border-radius: 3px;
+    object-fit: cover;
+    display: flex; align-items: center; justify-content: center;
+    color: #ccc; font-size: 18px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .admin-product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .admin-product-info { min-width: 0; }
+  .admin-product-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #1c1c1c; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .admin-product-meta { font-size: 10px; color: #aaa; letter-spacing: 1px; }
+  .admin-product-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .admin-list-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: white; border: 1px solid #eee;
+    border-radius: 4px; margin-bottom: 6px; font-size: 13px; color: #333;
+  }
+  .admin-del-btn {
+    background: none; border: none; color: #ccc;
+    cursor: pointer; font-size: 16px; transition: color 0.15s; padding: 2px 6px;
+  }
+  .admin-del-btn:hover { color: #e07070; }
+  .admin-pin-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 400;
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .admin-pin-overlay.open { display: flex; }
+  .admin-pin-box {
+    background: #1c1c1c; border-radius: 6px;
+    padding: 36px 32px; text-align: center; width: 300px;
+  }
+  .admin-pin-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px; color: white; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .admin-pin-sub { font-size: 10px; letter-spacing: 2px; color: #666; text-transform: uppercase; margin-bottom: 24px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--earth);
+    color: var(--cream);
+    padding: 12px 24px;
+    border-radius: 3px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .order-layout { grid-template-columns: 1fr; }
+    .order-sidebar { position: relative; top: 0; height: auto; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+    .header { padding: 14px 20px; }
+    .orders-view, .dashboard-view { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-brand">D.A.T.E.</div>
+    <div class="login-sub">PR Event Order System</div>
+
+    <!-- Step 1: Select staff -->
+    <div class="login-step active" id="loginStep1">
+      <label class="login-label" id="lbl-staff">Select Your Name</label>
+      <select class="login-select" id="loginStaff">
+        <option value="">-- Select --</option>
+        <option>Staff A</option>
+        <option>Staff B</option>
+        <option>Staff C</option>
+        <option>Staff D</option>
+        <option>Staff E</option>
+      </select>
+      <button class="login-btn" onclick="loginNextStep()">Next →</button>
+      <div class="login-error" id="loginError1"></div>
+    </div>
+
+    <!-- Step 2: PIN -->
+    <div class="login-step" id="loginStep2">
+      <label class="login-label" id="lbl-pin">Enter Event PIN</label>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="dot0"></div>
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key del" onclick="pinPress('clear')">CLR</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key del" onclick="pinPress('back')">⌫</button>
+      </div>
+      <div class="login-error" id="loginError2"></div>
+      <button class="login-back" onclick="loginBack()">← Back</button>
+    </div>
+  </div>
+</div>
+
+<div class="header" id="mainHeader" style="display:none;">
+  <div>
+    <div class="header-brand">D.A.T.E.</div>
+    <div class="header-sub">PR Event Order System</div>
+  </div>
+  <div class="header-right" style="align-items:center;gap:10px;">
+    <span id="syncStatus" style="font-size:10px;letter-spacing:1px;color:#888;min-width:120px;text-align:right;"></span>
+    <span class="event-badge" id="eventBadge" onclick="changeEvent()">—</span>
+    <button class="lang-toggle" id="langToggle" onclick="toggleLang()">日本語</button>
+    <button class="tab-btn active" id="tab-order" onclick="showView('order')" data-en="New Order" data-ja="新規注文">New Order</button>
+    <button class="tab-btn" id="tab-orders" onclick="showView('orders')" data-en="All Orders" data-ja="注文一覧">All Orders</button>
+    <button class="tab-btn" id="tab-dashboard" onclick="showView('dashboard')" data-en="Dashboard" data-ja="ダッシュボード">Dashboard</button>
+    <button class="tab-btn" onclick="showAdminLogin()" style="border-color:rgba(255,255,255,0.15);color:#888;" data-en="⚙ Admin" data-ja="⚙ 管理">⚙ Admin</button>
+    <button class="tab-btn" onclick="logout()" style="border-color:rgba(255,255,255,0.1);color:#666;" data-en="Logout" data-ja="ログアウト">Logout</button>
+  </div>
+</div>
+
+<!-- ===================== MAIN APP ===================== -->
+<div id="mainApp" style="display:none;">
+<!-- ===================== ORDER FORM VIEW ===================== -->
+<div id="view-order" class="view active">
+  <div class="order-layout">
+
+    <!-- Product Panel -->
+    <div class="product-panel">
+      <div class="panel-title">Collection</div>
+      <div class="panel-subtitle" id="panel-subtitle">2026 Spring · D.A.T.E. Sneakers · Select products to add</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="cat-btn active" onclick="setCat('ALL',this)">All</button>
+        <button class="cat-btn" onclick="setCat('WOMAN',this)">Woman</button>
+        <button class="cat-btn" onclick="setCat('MAN',this)">Man</button>
+      </div>
+      <input class="search-bar" type="text" id="searchInput" placeholder="Search by name or product code..." oninput="applyFilters()" />
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+
+    <!-- Order Sidebar -->
+    <div class="order-sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-title" id="lbl-order-details">Order Details</div>
+        <div class="customer-search-wrap">
+          <div class="cfield">
+            <label id="lbl-search-customer">Search Past Customer</label>
+            <input type="text" id="customerSearch" placeholder="Search name or email..." style="width:100%;padding:8px 10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#ddd;font-family:'Jost',sans-serif;font-size:12px;border-radius:2px;outline:none;" oninput="searchCustomers(this.value)" />
+          </div>
+          <div class="customer-suggestions" id="customerSuggestions"></div>
+        </div>
+        <div class="customer-fields">
+          <div class="cfield-row">
+            <div class="cfield">
+              <label>姓 (Last Name) *</label>
+              <input type="text" id="lastName" placeholder="山田" />
+            </div>
+            <div class="cfield">
+              <label>名 (First Name) *</label>
+              <input type="text" id="firstName" placeholder="花子" />
+            </div>
+          </div>
+          <div class="cfield">
+            <label>Email *</label>
+            <input type="email" id="email" placeholder="hanako@example.com" />
+          </div>
+          <div class="cfield">
+            <label>Phone *</label>
+            <input type="tel" id="phone" placeholder="090-0000-0000" />
+          </div>
+          <div class="cfield">
+            <label>〒 Postal Code *</label>
+            <input type="text" id="postal" placeholder="150-0001" maxlength="8" />
+          </div>
+          <div class="cfield">
+            <label>住所 Address *</label>
+            <input type="text" id="address1" placeholder="東京都渋谷区..." />
+          </div>
+          <div class="cfield">
+            <label>住所2 (Building / Room)</label>
+            <input type="text" id="address2" placeholder="〇〇マンション 101号室" />
+          </div>
+          <div class="cfield-row">
+            <div class="cfield">
+              <label>担当スタッフ</label>
+              <select id="staffName">
+                <option value="">-- Select --</option>
+                <option>Staff A</option>
+                <option>Staff B</option>
+                <option>Staff C</option>
+                <option>Staff D</option>
+                <option>Staff E</option>
+              </select>
+            </div>
+            <div class="cfield">
+              <label>招待者 Invited By</label>
+              <input type="text" id="invitedBy" placeholder="Name / Company" />
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+      </div>
+      <div class="order-items-title">Selected Items (<span id="itemCount">0</span>)</div>
+      <div class="order-items" id="orderItems">
+        <div class="empty-order">No items added yet.<br>Browse the collection →</div>
+      </div>
+      <div class="order-notes-wrap">
+        <div class="cfield">
+          <label id="lbl-order-notes">Order Notes</label>
+          <textarea id="orderNotes" style="width:100%;padding:8px 10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#ddd;font-family:'Jost',sans-serif;font-size:12px;border-radius:2px;resize:none;height:52px;outline:none;" placeholder="VIP, repeat buyer, special requests..."></textarea>
+        </div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="order-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount" id="totalAmount">¥0</span>
+        </div>
+        <button class="submit-btn" onclick="submitOrder()">Confirm Order →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ALL ORDERS VIEW ===================== -->
+<div id="view-orders" class="view">
+  <div class="orders-view">
+    <div class="view-header">
+      <div>
+        <div class="view-title">Orders</div>
+        <div class="view-count"><span id="orderCount">0</span> orders recorded</div>
+      </div>
+      <div class="export-btns">
+        <button class="export-btn" onclick="exportCSV()">Export Excel / CSV</button>
+        <button class="export-btn" onclick="exportShipping()">Export Shipping List</button>
+        <button class="export-btn primary" onclick="exportSagawa()">Export Sagawa CSV</button>
+      </div>
+    </div>
+    <table class="orders-table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Staff</th>
+          <th>Invited By</th>
+          <th>Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody">
+        <tr><td colspan="9" style="text-align:center;color:var(--stone);padding:40px;font-size:12px;letter-spacing:1px;">No orders yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD VIEW ===================== -->
+<div id="view-dashboard" class="view">
+  <div class="dashboard-view">
+    <div class="view-header">
+      <div class="view-title">Sales Dashboard</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value" id="dash-orders">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Items</div>
+        <div class="stat-value" id="dash-items">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value" id="dash-revenue">¥0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Order Value</div>
+        <div class="stat-value" id="dash-avg">¥0</div>
+      </div>
+    </div>
+    <div class="dashboard-grid">
+      <div class="dash-card">
+        <div class="dash-card-title">Top Selling Products</div>
+        <div id="productRanking"></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-title">Discount % Breakdown</div>
+        <div id="depositBreakdown"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-img" id="modalImg">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div style="text-align:center;color:var(--taupe);">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div style="font-size:10px;letter-spacing:2px;margin-top:8px;text-transform:uppercase;">Add product image via settings</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-code" id="modalCode"></div>
+      <div class="modal-price" id="modalPrice"></div>
+
+      <div class="size-chart">
+        <div class="size-chart-title">Size (EU) — Select size</div>
+        <div class="size-grid" id="sizeGrid"></div>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Discount %</label>
+        <div class="deposit-options">
+          <button class="deposit-btn" onclick="selectDeposit('NA')" id="depNA">NA</button>
+          <button class="deposit-btn" onclick="selectDeposit('Gift')" id="depGift">Gift</button>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Notes</label>
+        <input class="modal-input" type="text" id="itemNotes" placeholder="Special instructions..." />
+      </div>
+
+      <button class="add-to-order-btn" onclick="addToOrder()">Add to Order</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== EDIT ORDER MODAL ===================== -->
+<div class="edit-modal-overlay" id="editOrderModal">
+  <div class="edit-modal">
+    <div class="edit-modal-header">
+      <div class="edit-modal-title">Edit Order</div>
+      <button onclick="closeEditModal()" style="background:none;border:none;color:var(--stone);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div class="edit-modal-body">
+      <div class="edit-section-title">Customer Information</div>
+      <div class="edit-field-row">
+        <div class="edit-field"><label>姓 Last Name *</label><input type="text" id="edit-lastName" /></div>
+        <div class="edit-field"><label>名 First Name *</label><input type="text" id="edit-firstName" /></div>
+      </div>
+      <div class="edit-field"><label>Email *</label><input type="email" id="edit-email" /></div>
+      <div class="edit-field"><label>Phone *</label><input type="tel" id="edit-phone" /></div>
+      <div class="edit-field"><label>〒 Postal Code *</label><input type="text" id="edit-postal" maxlength="8" /></div>
+      <div class="edit-field"><label>住所 Address *</label><input type="text" id="edit-address1" /></div>
+      <div class="edit-field"><label>住所2 Building / Room</label><input type="text" id="edit-address2" /></div>
+      <div class="edit-field-row">
+        <div class="edit-field">
+          <label>担当スタッフ</label>
+          <select id="edit-staff">
+            <option value="">-- Select --</option>
+            <option>Staff A</option><option>Staff B</option><option>Staff C</option>
+            <option>Staff D</option><option>Staff E</option>
+          </select>
+        </div>
+        <div class="edit-field"><label>招待者 Invited By</label><input type="text" id="edit-invitedBy" /></div>
+      </div>
+
+      <div class="edit-section-title" style="margin-top:20px;">Ordered Items</div>
+      <div id="edit-items-list"></div>
+
+      <div class="edit-actions">
+        <button class="delete-confirm-btn" onclick="confirmDeleteOrder()">Delete Order</button>
+        <button class="edit-cancel-btn" onclick="closeEditModal()">Cancel</button>
+        <button class="edit-save-btn" onclick="saveEditOrder()">Save Changes →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="edit-modal-overlay" id="deleteConfirmModal">
+  <div class="edit-modal" style="max-width:400px;">
+    <div class="edit-modal-header" style="background:#3a3a3a;">
+      <div class="edit-modal-title">Delete Order</div>
+      <button onclick="closeDeleteConfirm()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div class="edit-modal-body" style="text-align:center;padding:32px 28px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;margin-bottom:12px;color:var(--earth)">Are you sure?</div>
+      <div id="delete-confirm-name" style="font-size:13px;color:var(--taupe);margin-bottom:24px;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="edit-cancel-btn" onclick="closeDeleteConfirm()">Cancel</button>
+        <button class="delete-confirm-btn" onclick="executeDelete()">Yes, Delete Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ===================== ADMIN VIEW ===================== -->
+<div id="view-admin" class="view">
+  <div style="padding:36px 40px;">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;letter-spacing:2px;">Admin Panel</div>
+        <div style="font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-top:4px;">Manage products, staff & settings</div>
+      </div>
+      <button onclick="showView('order')" style="padding:10px 20px;border:1px solid #ddd;background:white;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;cursor:pointer;border-radius:3px;">← Back to Orders</button>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div style="display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid #eee;">
+      <button class="admin-tab active" onclick="showAdminTab('products',this)">Products</button>
+      <button class="admin-tab" onclick="showAdminTab('staff',this)">Staff & PIN</button>
+      <button class="admin-tab" onclick="showAdminTab('events',this)">Events</button>
+      <button class="admin-tab" onclick="showAdminTab('settings',this)">Settings</button>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div id="admin-tab-products" class="admin-tab-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;"><span id="admin-product-count">0</span> products</div>
+        <div style="display:flex;gap:8px;">
+          <button class="admin-action-btn" style="background:white;color:#555;border:1px solid #ddd;" onclick="document.getElementById('csvUploadInput').click()">↑ Import CSV</button>
+          <input type="file" id="csvUploadInput" accept=".csv" style="display:none;" onchange="importProductCSV(this)" />
+          <button class="admin-action-btn" onclick="downloadCSVTemplate()">↓ CSV Template</button>
+          <button class="admin-action-btn" onclick="openAddProduct()">+ Add Product</button>
+        </div>
+      </div>
+      <div id="admin-product-list"></div>
+    </div>
+
+    <!-- STAFF & PIN TAB -->
+    <div id="admin-tab-staff" class="admin-tab-content" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:14px;">Staff Members</div>
+          <div id="admin-staff-list"></div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <input type="text" id="newStaffName" placeholder="New staff name..." style="flex:1;padding:9px 12px;border:1px solid #ddd;font-family:'Jost',sans-serif;font-size:13px;border-radius:3px;outline:none;" />
+            <button class="admin-action-btn" onclick="addStaff()">Add</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:14px;">Event PIN</div>
+          <div style="background:#f6f6f6;border:1px solid #eee;border-radius:4px;padding:20px;">
+            <div style="font-size:11px;color:#888;margin-bottom:10px;">Current PIN is hidden for security. Enter a new 4-digit PIN to change it.</div>
+            <input type="password" id="newPin" maxlength="4" placeholder="New 4-digit PIN" style="width:100%;padding:10px 12px;border:1px solid #ddd;font-family:'Jost',sans-serif;font-size:16px;letter-spacing:6px;border-radius:3px;outline:none;margin-bottom:10px;text-align:center;" />
+            <button class="admin-action-btn" style="width:100%;" onclick="changePin()">Update PIN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTS TAB -->
+    <div id="admin-tab-events" class="admin-tab-content" style="display:none;">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:14px;">Preset Event Names</div>
+      <div id="admin-event-list"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <input type="text" id="newEventName" placeholder="e.g. 2027SS Press Day — Tokyo" style="flex:1;padding:9px 12px;border:1px solid #ddd;font-family:'Jost',sans-serif;font-size:13px;border-radius:3px;outline:none;" />
+        <button class="admin-action-btn" onclick="addEvent()">Add</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="admin-tab-settings" class="admin-tab-content" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:14px;">Brand Name</div>
+          <input type="text" id="settingBrand" placeholder="D.A.T.E." style="width:100%;padding:10px 12px;border:1px solid #ddd;font-family:'Cormorant Garamond',serif;font-size:20px;letter-spacing:4px;border-radius:3px;outline:none;margin-bottom:10px;" />
+          <button class="admin-action-btn" onclick="saveBrandName()">Save Brand Name</button>
+        </div>
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:14px;">Collection Subtitle</div>
+          <input type="text" id="settingSubtitle" style="width:100%;padding:10px 12px;border:1px solid #ddd;font-family:'Jost',sans-serif;font-size:13px;border-radius:3px;outline:none;margin-bottom:10px;" />
+          <button class="admin-action-btn" onclick="saveSubtitle()">Save Subtitle</button>
+        </div>
+        <div style="grid-column:1/-1;">
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:14px;">Danger Zone</div>
+          <div style="background:#fff5f5;border:1px solid #fdd;border-radius:4px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;color:#c0392b;margin-bottom:3px;">Clear All Orders</div>
+              <div style="font-size:11px;color:#e07070;">Permanently deletes all order data. Cannot be undone.</div>
+            </div>
+            <button onclick="clearAllOrders()" style="padding:10px 18px;background:#c0392b;color:white;border:none;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:3px;">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT PRODUCT MODAL -->
+<div class="edit-modal-overlay" id="productEditModal">
+  <div class="edit-modal" style="max-width:520px;">
+    <div class="edit-modal-header">
+      <div class="edit-modal-title" id="productModalTitle">Add Product</div>
+      <button onclick="closeProductModal()" style="background:none;border:none;color:var(--stone);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div class="edit-modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="edit-field" style="grid-column:1/-1;">
+          <label>Product Name *</label>
+          <input type="text" id="pm-name" placeholder="HILL LOW GLITTER PLATINUM" />
+        </div>
+        <div class="edit-field">
+          <label>Product Code *</label>
+          <input type="text" id="pm-code" placeholder="W441-HL-GL-PL/PT" />
+        </div>
+        <div class="edit-field">
+          <label>System ID</label>
+          <input type="number" id="pm-id" placeholder="887" />
+        </div>
+        <div class="edit-field">
+          <label>Price (¥) *</label>
+          <input type="number" id="pm-price" placeholder="31000" />
+        </div>
+        <div class="edit-field">
+          <label>Category *</label>
+          <select id="pm-category">
+            <option value="WOMAN">Woman</option>
+            <option value="MAN">Man</option>
+          </select>
+        </div>
+        <div class="edit-field" style="grid-column:1/-1;">
+          <label>Color</label>
+          <input type="text" id="pm-color" placeholder="e.g. PLATINUM, WHITE-BLACK, IVORY" />
+        </div>
+      </div>
+
+      <!-- Image upload -->
+      <div class="edit-field" style="margin-top:4px;">
+        <label>Product Image</label>
+        <div id="pm-image-preview" style="width:100%;height:140px;background:#f6f6f6;border:2px dashed #ddd;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;transition:border-color 0.2s;position:relative;overflow:hidden;" onclick="document.getElementById('pm-image-input').click()">
+          <div id="pm-image-placeholder" style="text-align:center;color:#aaa;">
+            <div style="font-size:24px;margin-bottom:6px;">📷</div>
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;">Click to upload image</div>
+            <div style="font-size:10px;color:#ccc;margin-top:3px;">JPG, PNG, WebP</div>
+          </div>
+          <img id="pm-image-tag" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />
+        </div>
+        <input type="file" id="pm-image-input" accept="image/*" style="display:none;" onchange="handleProductImage(this)" />
+        <button id="pm-remove-img" style="display:none;background:none;border:none;color:#e07070;font-size:11px;cursor:pointer;letter-spacing:1px;" onclick="removeProductImage()">✕ Remove image</button>
+      </div>
+
+      <div class="edit-actions" style="margin-top:16px;">
+        <button class="edit-cancel-btn" onclick="closeProductModal()">Cancel</button>
+        <button class="edit-save-btn" onclick="saveProduct()">Save Product →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT SELECTOR MODAL -->
+<div class="edit-modal-overlay" id="eventModal">
+  <div class="edit-modal" style="max-width:400px;">
+    <div class="edit-modal-header">
+      <div class="edit-modal-title" id="lbl-select-event">Select Event</div>
+      <button onclick="closeEventModal()" style="background:none;border:none;color:var(--stone);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div class="edit-modal-body">
+      <div class="edit-field">
+        <label id="lbl-event-name">Event Name</label>
+        <select id="eventSelect" class="edit-field input" style="width:100%;padding:10px 12px;border:1px solid var(--sand);background:var(--cream);font-family:'Jost',sans-serif;font-size:13px;color:var(--earth);border-radius:3px;outline:none;">
+          <option>2026SS Press Day — Tokyo</option>
+          <option>2026SS VIP Preview — Tokyo</option>
+          <option>2026SS Buyer Event — Tokyo</option>
+          <option>2026AW Press Day — Tokyo</option>
+          <option>2026AW VIP Preview — Tokyo</option>
+          <option>2026AW Buyer Event — Tokyo</option>
+        </select>
+      </div>
+      <div class="edit-field" style="margin-top:8px;">
+        <label id="lbl-event-custom">Or enter custom event name</label>
+        <input type="text" id="eventCustom" style="width:100%;padding:10px 12px;border:1px solid var(--sand);background:var(--cream);font-family:'Jost',sans-serif;font-size:13px;color:var(--earth);border-radius:3px;outline:none;" placeholder="e.g. 2026SS Showroom Day 2" />
+      </div>
+      <button class="edit-save-btn" style="margin-top:16px;" onclick="saveEvent()">Confirm Event →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="edit-modal-overlay" id="receiptModal">
+  <div class="edit-modal" style="max-width:480px;" id="receiptContent">
+    <div class="edit-modal-header receipt-no-print">
+      <div class="edit-modal-title">Order Receipt</div>
+      <button onclick="closeReceipt()" style="background:none;border:none;color:var(--stone);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div class="receipt-body" id="receiptBody"></div>
+    <div class="receipt-no-print" style="padding:0 28px 24px;display:flex;gap:10px;">
+      <button class="edit-save-btn" onclick="window.print()">🖨 Print Receipt</button>
+      <button class="edit-cancel-btn" onclick="closeReceipt()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ADMIN PIN OVERLAY -->
+<div class="admin-pin-overlay" id="adminPinOverlay">
+  <div class="admin-pin-box">
+    <div class="admin-pin-title">Admin Access</div>
+    <div class="admin-pin-sub">Enter admin PIN</div>
+    <div class="pin-dots" id="adminPinDots">
+      <div class="pin-dot" id="adot0"></div>
+      <div class="pin-dot" id="adot1"></div>
+      <div class="pin-dot" id="adot2"></div>
+      <div class="pin-dot" id="adot3"></div>
+    </div>
+    <div class="pin-pad" style="margin:0 auto 12px;">
+      <button class="pin-key" onclick="adminPinPress('1')">1</button>
+      <button class="pin-key" onclick="adminPinPress('2')">2</button>
+      <button class="pin-key" onclick="adminPinPress('3')">3</button>
+      <button class="pin-key" onclick="adminPinPress('4')">4</button>
+      <button class="pin-key" onclick="adminPinPress('5')">5</button>
+      <button class="pin-key" onclick="adminPinPress('6')">6</button>
+      <button class="pin-key" onclick="adminPinPress('7')">7</button>
+      <button class="pin-key" onclick="adminPinPress('8')">8</button>
+      <button class="pin-key" onclick="adminPinPress('9')">9</button>
+      <button class="pin-key del" onclick="adminPinPress('clear')">CLR</button>
+      <button class="pin-key" onclick="adminPinPress('0')">0</button>
+      <button class="pin-key del" onclick="adminPinPress('back')">⌫</button>
+    </div>
+    <div class="login-error" id="adminPinError"></div>
+    <button class="login-back" onclick="closeAdminLogin()">Cancel</button>
+  </div>
+</div>
+
+</div><!-- end mainApp -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== DATA =====================
+const PRODUCTS = [
+  { id: 887, code: 'W441-HL-GL-PL/PT', name: 'HILL LOW GLITTER PLATINUM', price: 31000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 888, code: 'W441-HL-CA-WM/PT', name: 'HILL LOW CALF WHITE-PLATINUM', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 889, code: 'W441-HP-ST-PLJ', name: 'HILL PLATFORM STARDUST PLATINUM', price: 34000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 890, code: 'W441-AT-NY-IV/PT', name: 'ATHLETA NYLON IVORY', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 891, code: 'W441-AT-NY-MN/PT', name: 'ATHLETA NYLON MINT', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 892, code: 'W441-AT-NY-SK/PT', name: 'ATHLETA NYLON SKY', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 893, code: 'W441-AT-NY-SL/PT', name: 'ATHLETA NYLON SILVER', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 894, code: 'W441-AT-NY-WB/PT', name: 'ATHLETA NYLON WHITE BLACK', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 896, code: 'M441-AT-NY-WSP', name: 'MAN ATHLETA NYLON WHITE-SILVER POPUP', price: 30000, brand: 'D.A.T.E.', category: 'MAN' },
+  { id: 897, code: 'M441-TO-FG-NA/PT', name: 'MAN TORNEO FRINGED NATURAL', price: 34000, brand: 'D.A.T.E.', category: 'MAN' },
+  { id: 899, code: 'W441-C2-BA-WH/PT', name: 'COURT2.0 BASIC WHITE', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 900, code: 'W441-C2-GL-PL/PT', name: 'COURT2.0 GLITTER PLATINUM', price: 32000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 901, code: 'W441-CP-LM-SL/PT', name: 'COURT PLATFORM LAMINATED SILVER', price: 36000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 902, code: 'W441-CP-VC-WD/PT', name: 'COURT PLATFORM VINTAGE CALF WHITE-LEOPARD', price: 36000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 903, code: 'W441-F2-DR-LG/PT', name: 'FG20 DRAGON LIGHT GREY', price: 34000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 904, code: 'W441-F2-DR-GY/PT', name: 'FG20 DRAGON GREY', price: 34000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 905, code: 'W441-F2-DR-WS/PT', name: 'FG20 DRAGON WHITE-SILVER', price: 34000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 906, code: 'W441-F2-NT-TA/PT', name: 'FG20 NATURAL TAUPE', price: 34000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 907, code: 'W441-HP-ST-SLJ', name: 'HILL PLATFORM STARDUST SILVER', price: 34000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 908, code: 'W441-FG-AN-PS/PT', name: 'FG ANIMALIER WHIPS', price: 40000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 909, code: 'W441-FG-LI-HB/PT', name: 'FG LINEN WHITE-BEIGE', price: 38000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 910, code: 'W441-FG-MR-RS/PT', name: 'FG MIRROR IVORY-SILVER (予約商品)', price: 40000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 912, code: 'W441-AT-NY-BK/PT', name: 'ATHLETA NYLON BLACK', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 913, code: 'W441-AT-NY-WSP', name: 'ATHLETA NYLON WHITE-SILVER POPUP', price: 30000, brand: 'D.A.T.E.', category: 'WOMAN' },
+  { id: 914, code: 'M441-F2-CO-BI/PT', name: 'MAN FG20 COLORED BEIGE', price: 36000, brand: 'D.A.T.E.', category: 'MAN' },
+  { id: 915, code: 'M441-F2-CO-LG/PT', name: 'MAN FG20 COLORED LIGHT GREY', price: 36000, brand: 'D.A.T.E.', category: 'MAN' },
+  { id: 916, code: 'M441-F2-CO-MD/PT', name: 'MAN FG20 COLORED MUD', price: 36000, brand: 'D.A.T.E.', category: 'MAN' },
+  { id: 917, code: 'M441-FG-LE-WSJ/PT', name: 'MAN FG LEATHER WHITE-SILVER', price: 38000, brand: 'D.A.T.E.', category: 'MAN' },
+];
+
+const SIZES = [35,36,37,38,39,40,41,42,43,44,45,46];
+
+let currentProduct = null;
+let selectedSize = null;
+let selectedDeposit = null;
+let currentOrderItems = [];
+let allOrders = [];
+
+// ===================== RENDER PRODUCTS =====================
+function renderProducts(list) {
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = list.map(p => `
+    <div class="product-card" onclick="openModal(${p.id})">
+      <div class="product-img-placeholder">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.55 2.22l.88 6.25a3 3 0 002.36 2.33l.35 5.95A2 2 0 007.65 22h8.7a2 2 0 001.99-1.79l.35-5.95a3 3 0 002.36-2.33l.88-6.25a2 2 0 00-1.55-2.22z"/></svg>
+        <span>Add Photo</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-code">${p.code}</div>
+        <div class="product-price">¥${p.price.toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+let activeCat = 'ALL';
+
+function setCat(cat, el) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const filtered = PRODUCTS.filter(p => {
+    const matchCat = activeCat === 'ALL' || p.category === activeCat;
+    const matchQ = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  renderProducts(filtered);
+}
+
+function filterProducts(query) { applyFilters(); }
+
+// ===================== MODAL =====================
+function openModal(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  currentProduct = p;
+  selectedSize = null;
+  selectedDeposit = null;
+
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalCode').textContent = p.code + ' · ID: ' + p.id;
+  document.getElementById('modalPrice').textContent = '¥' + p.price.toLocaleString() + ' (tax incl.)';
+  document.getElementById('itemNotes').value = '';
+
+  // Sizes
+  const sg = document.getElementById('sizeGrid');
+  sg.innerHTML = SIZES.map(s => `<div class="size-chip" onclick="selectSize(${s}, this)">${s}</div>`).join('');
+
+  // Reset deposit buttons
+  ['NA','Gift'].forEach(d => document.getElementById('dep'+d).classList.remove('selected'));
+
+  document.getElementById('productModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('productModal').classList.remove('open');
+  currentProduct = null;
+}
+
+document.getElementById('productModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function selectSize(size, el) {
+  document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSize = size;
+}
+
+function selectDeposit(pct) {
+  selectedDeposit = pct;
+  ['NA','Gift'].forEach(d => document.getElementById('dep'+d).classList.remove('selected'));
+  document.getElementById('dep'+pct).classList.add('selected');
+}
+
+function addToOrder() {
+  if (!selectedSize) { showToast('Please select a size'); return; }
+  if (!selectedDeposit) { showToast('Please select a discount %'); return; }
+  const item = {
+    ...currentProduct,
+    size: selectedSize,
+    deposit: selectedDeposit,
+    notes: document.getElementById('itemNotes').value,
+    uid: Date.now() + Math.random()
+  };
+  currentOrderItems.push(item);
+  renderOrderItems();
+  closeModal();
+  showToast('Added: ' + currentProduct.name);
+}
+
+// ===================== ORDER ITEMS =====================
+function renderOrderItems() {
+  const container = document.getElementById('orderItems');
+  document.getElementById('itemCount').textContent = currentOrderItems.length;
+
+  if (currentOrderItems.length === 0) {
+    container.innerHTML = '<div class="empty-order">No items added yet.<br>Browse the collection →</div>';
+    document.getElementById('totalAmount').textContent = '¥0';
+    return;
+  }
+
+  const total = currentOrderItems.reduce((s, i) => s + i.price, 0);
+  document.getElementById('totalAmount').textContent = '¥' + total.toLocaleString();
+
+  container.innerHTML = currentOrderItems.map((item, idx) => `
+    <div class="order-item">
+      <button class="order-item-remove" onclick="removeItem(${idx})">×</button>
+      <div class="order-item-name">${item.name}</div>
+      <div class="order-item-details">Size EU ${item.size} · ${item.deposit}</div>
+      <div class="order-item-price">¥${item.price.toLocaleString()}</div>
+      ${item.notes ? `<div class="order-item-details" style="margin-top:3px;font-style:italic">${item.notes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function removeItem(idx) {
+  currentOrderItems.splice(idx, 1);
+  renderOrderItems();
+}
+
+// ===================== SUBMIT ORDER =====================
+function submitOrder() {
+  const lastName = document.getElementById('lastName').value.trim();
+  const firstName = document.getElementById('firstName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const postal = document.getElementById('postal').value.trim();
+  const address1 = document.getElementById('address1').value.trim();
+
+  if (!lastName || !firstName) { showToast('Please enter customer name'); return; }
+  if (!email) { showToast('Please enter email'); return; }
+  if (!phone) { showToast('Please enter phone number'); return; }
+  if (!postal || !address1) { showToast('Please enter address'); return; }
+  if (currentOrderItems.length === 0) { showToast('Please add at least one item'); return; }
+
+  const order = {
+    id: allOrders.length + 1,
+    timestamp: new Date().toLocaleString('ja-JP'),
+    lastName, firstName,
+    email, phone, postal,
+    address1,
+    address2: document.getElementById('address2').value.trim(),
+    staff: document.getElementById('staffName').value,
+    invitedBy: document.getElementById('invitedBy').value.trim(),
+    orderNotes: document.getElementById('orderNotes').value.trim(),
+    event: currentEvent,
+    items: [...currentOrderItems],
+    total: currentOrderItems.reduce((s, i) => s + i.price, 0)
+  };
+
+  allOrders.push(order);
+  currentOrderItems = [];
+
+  // Reset form
+  ['lastName','firstName','email','phone','postal','address1','address2','invitedBy'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('staffName').value = currentStaff;
+  document.getElementById('orderNotes').value = '';
+  document.getElementById('customerSearch').value = '';
+  renderOrderItems();
+
+  showToast('✓ Order confirmed for ' + lastName + ' ' + firstName);
+  setTimeout(() => showView('orders'), 1200);
+}
+
+// ===================== ORDERS TABLE =====================
+function renderOrdersTable() {
+  const body = document.getElementById('ordersBody');
+  document.getElementById('orderCount').textContent = allOrders.length;
+
+  if (allOrders.length === 0) {
+    body.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--stone);padding:40px;font-size:12px;letter-spacing:1px;">No orders yet</td></tr>';
+    return;
+  }
+
+  body.innerHTML = allOrders.map((o, idx) => `
+    <tr id="order-row-${o.id}">
+      <td style="color:var(--stone)">#${o.id}</td>
+      <td><strong>${o.lastName} ${o.firstName}</strong></td>
+      <td style="color:var(--taupe)">${o.email}</td>
+      <td style="color:var(--taupe)">${o.phone}</td>
+      <td>
+        ${o.items.map(i => `
+          <div style="margin-bottom:4px;font-size:11px;">
+            ${i.name}<br>
+            <span style="color:var(--stone)">EU${i.size}</span>
+            <span class="badge badge-na">${i.deposit}</span>
+            <span style="color:var(--accent)"> ¥${i.price.toLocaleString()}</span>
+          </div>
+        `).join('')}
+      </td>
+      <td style="color:var(--accent);font-weight:500">¥${o.total.toLocaleString()}</td>
+      <td style="color:var(--taupe)">${o.staff || '—'}</td>
+      <td style="color:var(--taupe)">${o.invitedBy || '—'}</td>
+      <td style="color:var(--stone);font-size:11px">${o.timestamp}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-direction:column;">
+          <button class="action-btn action-edit" onclick="openEditModal(${o.id})">✏ Edit</button>
+          <button class="action-btn" style="background:white;color:#555;border-color:#ddd;" onclick="showReceipt(${o.id})">🖨 Receipt</button>
+          <button class="action-btn action-delete" onclick="openDeleteConfirm(${o.id})">✕ Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ===================== DASHBOARD =====================
+function renderDashboard() {
+  const totalOrders = allOrders.length;
+  const totalItems = allOrders.reduce((s, o) => s + o.items.length, 0);
+  const totalRevenue = allOrders.reduce((s, o) => s + o.total, 0);
+  const avg = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
+  document.getElementById('dash-orders').textContent = totalOrders;
+  document.getElementById('dash-items').textContent = totalItems;
+  document.getElementById('dash-revenue').textContent = '¥' + totalRevenue.toLocaleString();
+  document.getElementById('dash-avg').textContent = '¥' + avg.toLocaleString();
+
+  // Product ranking
+  const productCounts = {};
+  allOrders.forEach(o => o.items.forEach(i => {
+    productCounts[i.name] = (productCounts[i.name] || 0) + 1;
+  }));
+  const sorted = Object.entries(productCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+
+  document.getElementById('productRanking').innerHTML = sorted.length === 0
+    ? '<div style="color:var(--stone);font-size:12px;text-align:center;padding:30px">No data yet</div>'
+    : sorted.map(([name, count], idx) => `
+      <div class="product-rank-item">
+        <div class="rank-num">${idx+1}</div>
+        <div class="rank-bar-wrap">
+          <div class="rank-name">${name}</div>
+          <div class="rank-bar"><div class="rank-bar-fill" style="width:${(count/maxCount)*100}%"></div></div>
+        </div>
+        <div class="rank-count">${count}</div>
+      </div>
+    `).join('');
+
+  // Deposit breakdown
+  const deps = {'NA':0, 'Gift':0};
+  allOrders.forEach(o => o.items.forEach(i => { if (deps[i.deposit] !== undefined) deps[i.deposit]++; }));
+  const maxDep = Math.max(...Object.values(deps), 1);
+
+  document.getElementById('depositBreakdown').innerHTML = `
+    <div class="dep-bar-item">
+      <div class="dep-label">NA</div>
+      <div class="dep-bar-wrap"><div class="dep-bar-fill dep-70" style="width:${(deps['NA']/maxDep)*100}%"></div></div>
+      <div class="dep-count">${deps['NA']}</div>
+    </div>
+    <div class="dep-bar-item">
+      <div class="dep-label">Gift</div>
+      <div class="dep-bar-wrap"><div class="dep-bar-fill dep-50" style="width:${(deps['Gift']/maxDep)*100}%"></div></div>
+      <div class="dep-count">${deps['Gift']}</div>
+    </div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--light-sand)">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--taupe);margin-bottom:10px">Items per product</div>
+      ${sorted.slice(0,5).map(([name,count]) => `
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--light-sand);font-size:11px">
+          <span style="color:var(--earth)">${name.length > 30 ? name.slice(0,28)+'...' : name}</span>
+          <span style="color:var(--accent);font-weight:500">${count} pcs</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ===================== EXPORT =====================
+function exportCSV() {
+  if (allOrders.length === 0) { showToast('No orders to export'); return; }
+
+  const headers = ['Order#','Last Name','First Name','Email','Phone','Postal','Address1','Address2',
+    'Product Name','Product Code','Product ID','Size','Price','Type','Item Notes','Staff','Invited By','Timestamp'];
+
+  const rows = [];
+  allOrders.forEach(o => {
+    o.items.forEach(item => {
+      rows.push([
+        o.id, o.lastName, o.firstName, o.email, o.phone, o.postal,
+        o.address1, o.address2,
+        item.name, item.code, item.id, item.size, item.price, item.deposit+'%',
+        item.notes || '', o.staff, o.invitedBy, o.timestamp
+      ]);
+    });
+  });
+
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadFile('\uFEFF' + csv, 'DATE_PR_Orders_' + dateStr() + '.csv', 'text/csv');
+  showToast('Excel/CSV exported!');
+}
+
+function exportSagawa() {
+  if (allOrders.length === 0) { showToast('No orders to export'); return; }
+
+  // Sagawa format based on uploaded template
+  const headers = [
+    'お届け先コード取得区分','お届け先コード','お届け先電話番号','お届け先郵便番号',
+    'お届け先住所１','お届け先住所２','お届け先住所３','お届け先名称１','お届け先名称２',
+    'お客様管理番号','お客様コード','部署ご担当者コード取得区分','部署ご担当者コード',
+    '部署ご担当者名称','荷送人電話番号','ご依頼主コード取得区分','ご依頼主コード',
+    'ご依頼主電話番号','ご依頼主郵便番号','ご依頼主住所１','ご依頼主住所２',
+    'ご依頼主名称１','ご依頼主名称２','荷姿','品名１','品名２','品名３','品名４','品名５',
+    '荷札荷姿','荷札品名１','出荷個数','スピード指定','クール便指定','配達日',
+    '配達指定時間帯','配達指定時間（時分）','代引金額','消費税','決済種別',
+    '保険金額','指定シール１','指定シール２','指定シール３','営業所受取','SRC区分',
+    '営業所受取営業所コード','元着区分','メールアドレス','ご不在時連絡先','出荷日'
+  ];
+
+  const rows = allOrders.map((o, idx) => {
+    const productNames = [...new Set(o.items.map(i => i.name))].slice(0,5);
+    return [
+      '0', '', // お届け先コード取得区分, コード
+      o.phone,                          // お届け先電話番号
+      o.postal,                         // お届け先郵便番号
+      o.address1,                       // お届け先住所１
+      o.address2 || '',                 // お届け先住所２
+      '',                               // お届け先住所３
+      o.lastName + ' ' + o.firstName,   // お届け先名称１
+      '',                               // お届け先名称２
+      'ORDER-' + String(o.id).padStart(4,'0'), // お客様管理番号
+      '',                               // お客様コード
+      '0','','',                        // 部署ご担当者
+      '',                               // 荷送人電話番号
+      '0','','','','','',               // ご依頼主
+      'D.A.T.E. Sneakers','',           // ご依頼主名称
+      'box',                            // 荷姿
+      productNames[0] || '',
+      productNames[1] || '',
+      productNames[2] || '',
+      productNames[3] || '',
+      productNames[4] || '',
+      '','','',                         // 荷札
+      o.items.length,                   // 出荷個数
+      '','','','','','',                // speed/cool/delivery
+      '','','','','','','','','',
+      o.email,                          // メールアドレス
+      o.phone,                          // ご不在時連絡先
+      ''                                // 出荷日
+    ];
+  });
+
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v || '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadFile('\uFEFF' + csv, 'DATE_Sagawa_' + dateStr() + '.csv', 'text/csv');
+  showToast('Sagawa CSV exported!');
+}
+
+function exportShipping() {
+  if (allOrders.length === 0) { showToast('No orders to export'); return; }
+
+  // Aggregate: product name + size -> quantity
+  const agg = {};
+  allOrders.forEach(o => {
+    o.items.forEach(item => {
+      // Extract color from product name (last word or part after last space segment)
+      const nameParts = item.name.replace('（予約商品）','').trim().split(' ');
+      const color = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '—';
+      const key = item.name + '||' + item.size;
+      if (!agg[key]) {
+        agg[key] = {
+          productName: item.name,
+          productCode: item.code,
+          productId: item.id,
+          color: color,
+          size: item.size,
+          qty: 0
+        };
+      }
+      agg[key].qty++;
+    });
+  });
+
+  const headers = ['Product Name', 'Product Code', 'Product ID', 'Color', 'Size (EU)', 'Quantity'];
+  const rows = Object.values(agg)
+    .sort((a,b) => a.productName.localeCompare(b.productName) || a.size - b.size)
+    .map(r => [r.productName, r.productCode, r.productId, r.color, r.size, r.qty]);
+
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadFile('\uFEFF' + csv, 'DATE_ShippingList_' + dateStr() + '.csv', 'text/csv');
+  showToast('Shipping list exported!');
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type: type + ';charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function dateStr() {
+  return new Date().toISOString().slice(0,10).replace(/-/g,'');
+}
+
+
+// ===================== EDIT & DELETE =====================
+let editingOrderId = null;
+let deletingOrderId = null;
+
+function openEditModal(orderId) {
+  const o = allOrders.find(x => x.id === orderId);
+  if (!o) return;
+  editingOrderId = orderId;
+
+  document.getElementById('edit-lastName').value = o.lastName;
+  document.getElementById('edit-firstName').value = o.firstName;
+  document.getElementById('edit-email').value = o.email;
+  document.getElementById('edit-phone').value = o.phone;
+  document.getElementById('edit-postal').value = o.postal;
+  document.getElementById('edit-address1').value = o.address1;
+  document.getElementById('edit-address2').value = o.address2 || '';
+  document.getElementById('edit-staff').value = o.staff || '';
+  document.getElementById('edit-invitedBy').value = o.invitedBy || '';
+
+  renderEditItems(o.items);
+  document.getElementById('editOrderModal').classList.add('open');
+}
+
+function renderEditItems(items) {
+  const container = document.getElementById('edit-items-list');
+  if (items.length === 0) {
+    container.innerHTML = '<div style="color:var(--stone);font-size:12px;text-align:center;padding:20px;">No items — order will be deleted on save</div>';
+    return;
+  }
+  container.innerHTML = items.map((item, idx) => `
+    <div class="edit-item-row" id="edit-item-${idx}">
+      <button class="edit-item-del" onclick="removeEditItem(${idx})">×</button>
+      <div class="edit-item-name">${item.name}</div>
+      <div class="edit-item-controls">
+        <div>
+          <label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--taupe);display:block;margin-bottom:3px;">Size (EU)</label>
+          <select onchange="updateEditItem(${idx}, 'size', parseInt(this.value))">
+            ${[35,36,37,38,39,40,41,42,43,44,45,46].map(s => `<option value="${s}" ${item.size===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--taupe);display:block;margin-bottom:3px;">Discount %</label>
+          <select onchange="updateEditItem(${idx}, 'deposit', parseInt(this.value))">
+            <option value="NA" ${item.deposit==='NA'?'selected':''}>NA</option>
+            <option value="Gift" ${item.deposit==='Gift'?'selected':''}>Gift</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--taupe);display:block;margin-bottom:3px;">Notes</label>
+          <input type="text" value="${item.notes || ''}" oninput="updateEditItem(${idx}, 'notes', this.value)" placeholder="Notes..." style="width:100%;" />
+        </div>
+        <div style="align-self:flex-end;font-size:12px;color:var(--accent);white-space:nowrap;">¥${item.price.toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Temporary edit state
+let editItems = [];
+
+function openEditModalWithItems(orderId) {
+  const o = allOrders.find(x => x.id === orderId);
+  editItems = JSON.parse(JSON.stringify(o.items));
+  openEditModal(orderId);
+  renderEditItems(editItems);
+}
+
+function removeEditItem(idx) {
+  const o = allOrders.find(x => x.id === editingOrderId);
+  editItems = editItems.length ? editItems : JSON.parse(JSON.stringify(o.items));
+  editItems.splice(idx, 1);
+  renderEditItems(editItems);
+}
+
+function updateEditItem(idx, field, value) {
+  const o = allOrders.find(x => x.id === editingOrderId);
+  if (!editItems.length) editItems = JSON.parse(JSON.stringify(o.items));
+  editItems[idx][field] = value;
+}
+
+function saveEditOrder() {
+  const lastName = document.getElementById('edit-lastName').value.trim();
+  const firstName = document.getElementById('edit-firstName').value.trim();
+  const email = document.getElementById('edit-email').value.trim();
+  const phone = document.getElementById('edit-phone').value.trim();
+  const postal = document.getElementById('edit-postal').value.trim();
+  const address1 = document.getElementById('edit-address1').value.trim();
+
+  if (!lastName || !firstName) { showToast('Please enter customer name'); return; }
+  if (!email) { showToast('Please enter email'); return; }
+  if (!phone) { showToast('Please enter phone'); return; }
+  if (!postal || !address1) { showToast('Please enter address'); return; }
+
+  const idx = allOrders.findIndex(x => x.id === editingOrderId);
+  if (idx === -1) return;
+
+  const o = allOrders[idx];
+  const items = editItems.length ? editItems : o.items;
+
+  allOrders[idx] = {
+    ...o,
+    lastName, firstName, email, phone, postal, address1,
+    address2: document.getElementById('edit-address2').value.trim(),
+    staff: document.getElementById('edit-staff').value,
+    invitedBy: document.getElementById('edit-invitedBy').value.trim(),
+    items: items,
+    total: items.reduce((s, i) => s + i.price, 0),
+  };
+
+  editItems = [];
+  closeEditModal();
+  renderOrdersTable();
+  showToast('✓ Order updated');
+}
+
+function closeEditModal() {
+  document.getElementById('editOrderModal').classList.remove('open');
+  editingOrderId = null;
+  editItems = [];
+}
+
+function openDeleteConfirm(orderId) {
+  const o = allOrders.find(x => x.id === orderId);
+  if (!o) return;
+  deletingOrderId = orderId;
+  document.getElementById('delete-confirm-name').textContent =
+    'This will permanently delete the order for ' + o.lastName + ' ' + o.firstName + '.';
+  document.getElementById('deleteConfirmModal').classList.add('open');
+}
+
+function confirmDeleteOrder() {
+  closeEditModal();
+  openDeleteConfirm(editingOrderId);
+}
+
+function closeDeleteConfirm() {
+  document.getElementById('deleteConfirmModal').classList.remove('open');
+  deletingOrderId = null;
+}
+
+function executeDelete() {
+  if (!deletingOrderId) return;
+  allOrders = allOrders.filter(x => x.id !== deletingOrderId);
+  closeDeleteConfirm();
+  renderOrdersTable();
+  showToast('Order deleted');
+}
+
+// Close modals on overlay click
+document.getElementById('editOrderModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+document.getElementById('deleteConfirmModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteConfirm();
+});
+
+// Override openEditModal to also load items
+const _origOpenEdit = openEditModal;
+openEditModal = function(orderId) {
+  const o = allOrders.find(x => x.id === orderId);
+  if (!o) return;
+  editItems = JSON.parse(JSON.stringify(o.items));
+  _origOpenEdit(orderId);
+  renderEditItems(editItems);
+};
+
+// ===================== VIEWS =====================
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  event && event.target && event.target.classList.add('active');
+
+  if (name === 'orders') renderOrdersTable();
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ===================== TOAST =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+
+// ===================== LOGIN =====================
+const EVENT_PIN = '1234'; // Change this to your actual PIN
+let currentStaff = '';
+let currentEvent = '2026SS Press Day — Tokyo';
+let currentLang = 'en';
+let enteredPin = '';
+
+function loginNextStep() {
+  const staff = document.getElementById('loginStaff').value;
+  if (!staff) { document.getElementById('loginError1').textContent = 'Please select your name'; return; }
+  currentStaff = staff;
+  document.getElementById('loginStep1').classList.remove('active');
+  document.getElementById('loginStep2').classList.add('active');
+  document.getElementById('loginError2').textContent = '';
+  enteredPin = '';
+  updatePinDots();
+}
+
+function loginBack() {
+  document.getElementById('loginStep2').classList.remove('active');
+  document.getElementById('loginStep1').classList.add('active');
+  enteredPin = '';
+  updatePinDots();
+}
+
+function pinPress(key) {
+  if (key === 'clear') { enteredPin = ''; }
+  else if (key === 'back') { enteredPin = enteredPin.slice(0,-1); }
+  else if (enteredPin.length < 4) { enteredPin += key; }
+  updatePinDots();
+  if (enteredPin.length === 4) {
+    setTimeout(() => {
+      if (enteredPin === (window._eventPin || EVENT_PIN)) {
+        enterApp();
+      } else {
+        document.getElementById('loginError2').textContent = currentLang === 'ja' ? 'PINが正しくありません' : 'Incorrect PIN. Try again.';
+        enteredPin = '';
+        updatePinDots();
+      }
+    }, 200);
+  }
+}
+
+function updatePinDots() {
+  for (let i=0; i<4; i++) {
+    document.getElementById('dot'+i).classList.toggle('filled', i < enteredPin.length);
+  }
+}
+
+function enterApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainHeader').style.display = '';
+  document.getElementById('mainApp').style.display = '';
+  // Set staff in dropdown
+  document.getElementById('staffName').value = currentStaff;
+  document.getElementById('eventBadge').textContent = currentEvent;
+  applyLang();
+  loadFromSheets();
+}
+
+function logout() {
+  if (!confirm(currentLang === 'ja' ? 'ログアウトしますか？' : 'Log out?')) return;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('mainHeader').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'none';
+  enteredPin = '';
+  currentStaff = '';
+  document.getElementById('loginStaff').value = '';
+  document.getElementById('loginStep2').classList.remove('active');
+  document.getElementById('loginStep1').classList.add('active');
+  updatePinDots();
+}
+
+// ===================== EVENT SELECTOR =====================
+function changeEvent() {
+  document.getElementById('eventModal').classList.add('open');
+  document.getElementById('eventCustom').value = '';
+}
+function closeEventModal() {
+  document.getElementById('eventModal').classList.remove('open');
+}
+function saveEvent() {
+  const custom = document.getElementById('eventCustom').value.trim();
+  const selected = document.getElementById('eventSelect').value;
+  currentEvent = custom || selected;
+  document.getElementById('eventBadge').textContent = currentEvent;
+  closeEventModal();
+  showToast(currentLang === 'ja' ? 'イベントを設定しました' : 'Event updated');
+}
+document.getElementById('eventModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEventModal();
+});
+
+// ===================== LANGUAGE TOGGLE =====================
+const LABELS = {
+  en: {
+    'lbl-order-details': 'Order Details',
+    'lbl-search-customer': 'Search Past Customer',
+    'lbl-order-notes': 'Order Notes',
+    'lbl-select-event': 'Select Event',
+    'lbl-event-name': 'Event Name',
+    'lbl-event-custom': 'Or enter custom event name',
+    'lbl-staff': 'Select Your Name',
+    'lbl-pin': 'Enter Event PIN',
+    'panel-subtitle': '2026 Spring · D.A.T.E. Sneakers · Select products to add',
+  },
+  ja: {
+    'lbl-order-details': '注文詳細',
+    'lbl-search-customer': '過去の顧客を検索',
+    'lbl-order-notes': '注文メモ',
+    'lbl-select-event': 'イベントを選択',
+    'lbl-event-name': 'イベント名',
+    'lbl-event-custom': 'カスタムイベント名を入力',
+    'lbl-staff': 'お名前を選択してください',
+    'lbl-pin': 'イベントPINを入力',
+    'panel-subtitle': '2026春夏 · D.A.T.E. スニーカー · 商品を選択してください',
+  }
+};
+
+const FIELD_LABELS = {
+  en: { lastName:'姓 (Last Name) *', firstName:'名 (First Name) *', email:'Email *', phone:'Phone *', postal:'〒 Postal Code *', address1:'住所 Address *', address2:'住所2 (Building / Room)', staff:'担当スタッフ', invitedBy:'招待者 Invited By' },
+  ja: { lastName:'姓 *', firstName:'名 *', email:'メールアドレス *', phone:'電話番号 *', postal:'郵便番号 *', address1:'住所 *', address2:'建物名・部屋番号', staff:'担当スタッフ', invitedBy:'招待者' }
+};
+
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'ja' : 'en';
+  document.getElementById('langToggle').textContent = currentLang === 'en' ? '日本語' : 'English';
+  applyLang();
+}
+
+function applyLang() {
+  const L = LABELS[currentLang];
+  Object.keys(L).forEach(id => {
+    const el = document.getElementById(id) || document.querySelector('.'+id);
+    if (el) el.textContent = L[id];
+  });
+  // Tab buttons
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = currentLang === 'en' ? el.dataset.en : el.dataset.ja;
+  });
+  // Placeholders
+  const placeholders = {
+    en: { customerSearch: 'Search name or email...', orderNotes: 'VIP, repeat buyer, special requests...' },
+    ja: { customerSearch: '名前・メールで検索...', orderNotes: 'VIP、リピーター、特記事項...' }
+  };
+  Object.keys(placeholders[currentLang]).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = placeholders[currentLang][id];
+  });
+}
+
+// ===================== CUSTOMER SEARCH =====================
+function searchCustomers(query) {
+  const box = document.getElementById('customerSuggestions');
+  if (!query || query.length < 2 || allOrders.length === 0) { box.classList.remove('open'); return; }
+  const q = query.toLowerCase();
+  // Unique customers from past orders
+  const seen = {};
+  const matches = [];
+  allOrders.forEach(o => {
+    const key = o.email;
+    if (!seen[key] && (
+      (o.lastName+' '+o.firstName).toLowerCase().includes(q) ||
+      o.email.toLowerCase().includes(q)
+    )) {
+      seen[key] = true;
+      matches.push(o);
+    }
+  });
+  if (matches.length === 0) { box.classList.remove('open'); return; }
+  box.innerHTML = matches.slice(0,6).map(o => `
+    <div class="suggestion-item" onclick="autofillCustomer('${o.email}')">
+      ${o.lastName} ${o.firstName}
+      <span>${o.email} · ${o.phone}</span>
+    </div>
+  `).join('');
+  box.classList.add('open');
+}
+
+function autofillCustomer(email) {
+  const o = [...allOrders].reverse().find(x => x.email === email);
+  if (!o) return;
+  document.getElementById('lastName').value = o.lastName;
+  document.getElementById('firstName').value = o.firstName;
+  document.getElementById('email').value = o.email;
+  document.getElementById('phone').value = o.phone;
+  document.getElementById('postal').value = o.postal;
+  document.getElementById('address1').value = o.address1;
+  document.getElementById('address2').value = o.address2 || '';
+  document.getElementById('invitedBy').value = o.invitedBy || '';
+  document.getElementById('customerSearch').value = '';
+  document.getElementById('customerSuggestions').classList.remove('open');
+  showToast('✓ Customer details filled');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.customer-search-wrap')) {
+    document.getElementById('customerSuggestions').classList.remove('open');
+  }
+});
+
+// ===================== RECEIPT =====================
+function showReceipt(orderId) {
+  const o = allOrders.find(x => x.id === orderId);
+  if (!o) return;
+  const isJa = currentLang === 'ja';
+  document.getElementById('receiptBody').innerHTML = `
+    <div class="receipt-header">
+      <div class="receipt-brand">D.A.T.E.</div>
+      <div class="receipt-event">${currentEvent}</div>
+    </div>
+    <div class="receipt-section">
+      <div class="receipt-section-title">${isJa ? 'お客様情報' : 'Customer'}</div>
+      <div class="receipt-row"><span>${isJa ? 'お名前' : 'Name'}</span><span>${o.lastName} ${o.firstName}</span></div>
+      <div class="receipt-row"><span>${isJa ? 'メール' : 'Email'}</span><span>${o.email}</span></div>
+      <div class="receipt-row"><span>${isJa ? '電話番号' : 'Phone'}</span><span>${o.phone}</span></div>
+      <div class="receipt-row"><span>${isJa ? '住所' : 'Address'}</span><span>${o.postal} ${o.address1} ${o.address2||''}</span></div>
+    </div>
+    <div class="receipt-section">
+      <div class="receipt-section-title">${isJa ? 'ご注文商品' : 'Ordered Items'}</div>
+      ${o.items.map(i => `
+        <div class="receipt-item">
+          <div class="receipt-item-name">${i.name}</div>
+          <div class="receipt-item-detail">
+            EU ${i.size} &nbsp;·&nbsp; ${isJa ? '割引' : 'Discount'} ${i.deposit === 100 ? '100% OFF' : i.deposit+'%'}
+            &nbsp;·&nbsp; ¥${i.price.toLocaleString()}
+            ${i.notes ? ' · ' + i.notes : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    ${o.orderNotes ? `<div class="receipt-section"><div class="receipt-section-title">${isJa ? '備考' : 'Notes'}</div><div style="font-size:12px;color:#555;">${o.orderNotes}</div></div>` : ''}
+    <div class="receipt-total">
+      <span>${isJa ? '合計金額' : 'Total'}</span>
+      <strong>¥${o.total.toLocaleString()}</strong>
+    </div>
+    <div class="receipt-footer">
+      ${isJa ? '担当' : 'Staff'}: ${o.staff || '—'} &nbsp;·&nbsp; Order #${o.id} &nbsp;·&nbsp; ${o.timestamp}
+    </div>
+  `;
+  document.getElementById('receiptModal').classList.add('open');
+}
+function closeReceipt() {
+  document.getElementById('receiptModal').classList.remove('open');
+}
+document.getElementById('receiptModal').addEventListener('click', function(e) {
+  if (e.target === this) closeReceipt();
+});
+
+
+
+// ===================== ADMIN =====================
+const ADMIN_PIN = '0000'; // Separate admin PIN — change this!
+let adminPinEntry = '';
+let editingProductId = null;
+let productImageData = null;
+
+// --- Admin PIN gate ---
+function showAdminLogin() {
+  adminPinEntry = '';
+  updateAdminPinDots();
+  document.getElementById('adminPinError').textContent = '';
+  document.getElementById('adminPinOverlay').classList.add('open');
+}
+function closeAdminLogin() {
+  document.getElementById('adminPinOverlay').classList.remove('open');
+  adminPinEntry = '';
+}
+function adminPinPress(key) {
+  if (key === 'clear') adminPinEntry = '';
+  else if (key === 'back') adminPinEntry = adminPinEntry.slice(0,-1);
+  else if (adminPinEntry.length < 4) adminPinEntry += key;
+  updateAdminPinDots();
+  if (adminPinEntry.length === 4) {
+    setTimeout(() => {
+      if (adminPinEntry === ADMIN_PIN) {
+        closeAdminLogin();
+        showView('admin');
+        renderAdminProducts();
+        renderAdminStaff();
+        renderAdminEvents();
+        loadAdminSettings();
+      } else {
+        document.getElementById('adminPinError').textContent = 'Incorrect PIN';
+        adminPinEntry = '';
+        updateAdminPinDots();
+      }
+    }, 200);
+  }
+}
+function updateAdminPinDots() {
+  for (let i=0; i<4; i++) {
+    document.getElementById('adot'+i).classList.toggle('filled', i < adminPinEntry.length);
+  }
+}
+
+// --- Admin tabs ---
+function showAdminTab(tab, el) {
+  document.querySelectorAll('.admin-tab-content').forEach(t => t.style.display='none');
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('admin-tab-'+tab).style.display = '';
+  el.classList.add('active');
+}
+
+// --- PRODUCTS ---
+function renderAdminProducts() {
+  const list = document.getElementById('admin-product-list');
+  document.getElementById('admin-product-count').textContent = PRODUCTS.length;
+  if (PRODUCTS.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:#aaa;padding:40px;font-size:12px;">No products yet. Add one above.</div>';
+    return;
+  }
+  list.innerHTML = PRODUCTS.map((p, idx) => `
+    <div class="admin-product-row">
+      <div class="admin-product-thumb">
+        ${p.image ? `<img src="${p.image}" />` : '👟'}
+      </div>
+      <div class="admin-product-info">
+        <div class="admin-product-name">${p.name}</div>
+        <div class="admin-product-meta">${p.code} · #${p.id} · ¥${p.price.toLocaleString()} · ${p.category}${p.color ? ' · ' + p.color : ''}</div>
+      </div>
+      <div class="admin-product-actions">
+        <button class="action-btn action-edit" onclick="openEditProduct(${idx})">✏ Edit</button>
+        <button class="action-btn action-delete" onclick="deleteProduct(${idx})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddProduct() {
+  editingProductId = null;
+  productImageData = null;
+  document.getElementById('productModalTitle').textContent = 'Add Product';
+  document.getElementById('pm-name').value = '';
+  document.getElementById('pm-code').value = '';
+  document.getElementById('pm-id').value = '';
+  document.getElementById('pm-price').value = '';
+  document.getElementById('pm-category').value = 'WOMAN';
+  document.getElementById('pm-color').value = '';
+  document.getElementById('pm-image-tag').style.display = 'none';
+  document.getElementById('pm-image-placeholder').style.display = '';
+  document.getElementById('pm-remove-img').style.display = 'none';
+  document.getElementById('productEditModal').classList.add('open');
+}
+
+function openEditProduct(idx) {
+  editingProductId = idx;
+  const p = PRODUCTS[idx];
+  productImageData = p.image || null;
+  document.getElementById('productModalTitle').textContent = 'Edit Product';
+  document.getElementById('pm-name').value = p.name;
+  document.getElementById('pm-code').value = p.code;
+  document.getElementById('pm-id').value = p.id;
+  document.getElementById('pm-price').value = p.price;
+  document.getElementById('pm-category').value = p.category;
+  document.getElementById('pm-color').value = p.color || '';
+  if (p.image) {
+    document.getElementById('pm-image-tag').src = p.image;
+    document.getElementById('pm-image-tag').style.display = 'block';
+    document.getElementById('pm-image-placeholder').style.display = 'none';
+    document.getElementById('pm-remove-img').style.display = 'inline';
+  } else {
+    document.getElementById('pm-image-tag').style.display = 'none';
+    document.getElementById('pm-image-placeholder').style.display = '';
+    document.getElementById('pm-remove-img').style.display = 'none';
+  }
+  document.getElementById('productEditModal').classList.add('open');
+}
+
+function handleProductImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    productImageData = e.target.result;
+    document.getElementById('pm-image-tag').src = productImageData;
+    document.getElementById('pm-image-tag').style.display = 'block';
+    document.getElementById('pm-image-placeholder').style.display = 'none';
+    document.getElementById('pm-remove-img').style.display = 'inline';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeProductImage() {
+  productImageData = null;
+  document.getElementById('pm-image-tag').style.display = 'none';
+  document.getElementById('pm-image-tag').src = '';
+  document.getElementById('pm-image-placeholder').style.display = '';
+  document.getElementById('pm-remove-img').style.display = 'none';
+  document.getElementById('pm-image-input').value = '';
+}
+
+function saveProduct() {
+  const name = document.getElementById('pm-name').value.trim();
+  const code = document.getElementById('pm-code').value.trim();
+  const price = parseInt(document.getElementById('pm-price').value);
+  const category = document.getElementById('pm-category').value;
+  const id = parseInt(document.getElementById('pm-id').value) || (Date.now() % 100000);
+  const color = document.getElementById('pm-color').value.trim();
+  if (!name || !code || !price) { showToast('Please fill in name, code and price'); return; }
+  const product = { id, code, name, price, color, brand: 'D.A.T.E.', category, image: productImageData || null };
+  if (editingProductId !== null) {
+    PRODUCTS[editingProductId] = product;
+    showToast('✓ Product updated');
+  } else {
+    PRODUCTS.push(product);
+    showToast('✓ Product added');
+  }
+  closeProductModal();
+  renderAdminProducts();
+  renderProducts(PRODUCTS);
+}
+
+function deleteProduct(idx) {
+  if (!confirm('Delete ' + PRODUCTS[idx].name + '?')) return;
+  PRODUCTS.splice(idx, 1);
+  renderAdminProducts();
+  renderProducts(PRODUCTS);
+  showToast('Product deleted');
+}
+
+function closeProductModal() {
+  document.getElementById('productEditModal').classList.remove('open');
+  editingProductId = null;
+  productImageData = null;
+}
+document.getElementById('productEditModal').addEventListener('click', function(e) {
+  if (e.target === this) closeProductModal();
+});
+
+// --- STAFF ---
+let STAFF_LIST = ['Staff A','Staff B','Staff C','Staff D','Staff E'];
+
+function renderAdminStaff() {
+  const list = document.getElementById('admin-staff-list');
+  list.innerHTML = STAFF_LIST.map((s,i) => `
+    <div class="admin-list-item">
+      <span>${s}</span>
+      <button class="admin-del-btn" onclick="deleteStaff(${i})">×</button>
+    </div>
+  `).join('');
+  // Sync all staff dropdowns
+  syncStaffDropdowns();
+}
+
+function addStaff() {
+  const name = document.getElementById('newStaffName').value.trim();
+  if (!name) return;
+  STAFF_LIST.push(name);
+  document.getElementById('newStaffName').value = '';
+  renderAdminStaff();
+  showToast('✓ Staff added: ' + name);
+}
+
+function deleteStaff(idx) {
+  STAFF_LIST.splice(idx, 1);
+  renderAdminStaff();
+}
+
+function syncStaffDropdowns() {
+  const opts = '<option value="">-- Select --</option>' + STAFF_LIST.map(s => `<option>${s}</option>`).join('');
+  ['staffName','edit-staff','loginStaff'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { const cur = el.value; el.innerHTML = opts; el.value = cur; }
+  });
+}
+
+function changePin() {
+  const pin = document.getElementById('newPin').value.trim();
+  if (pin.length !== 4 || !/^[0-9]{4}$/.test(pin)) {
+    showToast('PIN must be exactly 4 digits'); return;
+  }
+  // Update event PIN in memory (re-assign the const via window)
+  window._eventPin = pin;
+  document.getElementById('newPin').value = '';
+  showToast('✓ Event PIN updated');
+}
+
+// --- EVENTS ---
+let EVENT_LIST = [
+  '2026SS Press Day — Tokyo','2026SS VIP Preview — Tokyo','2026SS Buyer Event — Tokyo',
+  '2026AW Press Day — Tokyo','2026AW VIP Preview — Tokyo','2026AW Buyer Event — Tokyo'
+];
+
+function renderAdminEvents() {
+  const list = document.getElementById('admin-event-list');
+  list.innerHTML = EVENT_LIST.map((e,i) => `
+    <div class="admin-list-item">
+      <span>${e}</span>
+      <button class="admin-del-btn" onclick="deleteEventPreset(${i})">×</button>
+    </div>
+  `).join('');
+  // Sync event dropdown
+  const sel = document.getElementById('eventSelect');
+  if (sel) sel.innerHTML = EVENT_LIST.map(e => `<option>${e}</option>`).join('');
+}
+
+function addEvent() {
+  const name = document.getElementById('newEventName').value.trim();
+  if (!name) return;
+  EVENT_LIST.push(name);
+  document.getElementById('newEventName').value = '';
+  renderAdminEvents();
+  showToast('✓ Event added');
+}
+
+function deleteEventPreset(idx) {
+  EVENT_LIST.splice(idx, 1);
+  renderAdminEvents();
+}
+
+// --- SETTINGS ---
+function loadAdminSettings() {
+  document.getElementById('settingBrand').value = document.querySelector('.header-brand').textContent;
+  document.getElementById('settingSubtitle').value = document.getElementById('panel-subtitle')?.textContent || '2026 Spring · D.A.T.E. Sneakers · Select products to add';
+}
+function saveBrandName() {
+  const name = document.getElementById('settingBrand').value.trim();
+  if (!name) return;
+  document.querySelector('.header-brand').textContent = name;
+  document.querySelector('.login-brand').textContent = name;
+  showToast('✓ Brand name updated');
+}
+function saveSubtitle() {
+  const sub = document.getElementById('settingSubtitle').value.trim();
+  const el = document.getElementById('panel-subtitle');
+  if (el) el.textContent = sub;
+  showToast('✓ Subtitle updated');
+}
+function clearAllOrders() {
+  if (!confirm('Are you sure? This will delete ALL orders and cannot be undone.')) return;
+  allOrders = [];
+  scheduleSave();
+  showToast('All orders cleared');
+}
+
+// Override EVENT_PIN check to support updated PIN
+const _origPinPress = pinPress;
+pinPress = function(key) {
+  if (key !== 'clear' && key !== 'back' && enteredPin.length < 4) {
+    const testPin = enteredPin + key;
+    // Will be checked in the original function
+  }
+  _origPinPress(key);
+};
+// Patch enterApp to use dynamic pin
+const _origLoginNext = loginNextStep;
+
+
+// ===================== CSV IMPORT / EXPORT =====================
+function downloadCSVTemplate() {
+  const headers = ['name','code','id','price','category','color'];
+  const example1 = ['HILL LOW GLITTER PLATINUM','W441-HL-GL-PL/PT','887','31000','WOMAN','PLATINUM'];
+  const example2 = ['MAN FG LEATHER WHITE-SILVER','M441-FG-LE-WSJ/PT','917','38000','MAN','WHITE-SILVER'];
+  const csv = [headers, example1, example2]
+    .map(r => r.map(v => `"${v}"`).join(','))
+    .join('\n');
+  downloadFile('\uFEFF' + csv, 'DATE_Product_Template.csv', 'text/csv');
+  showToast('Template downloaded!');
+}
+
+function importProductCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const text = e.target.result.replace(/^\uFEFF/, ''); // strip BOM
+      const lines = text.trim().split('\n').filter(l => l.trim());
+      if (lines.length < 2) { showToast('CSV is empty or has no data rows'); return; }
+
+      // Parse header row — flexible, order doesn't matter
+      const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim().toLowerCase());
+      const col = (name) => headers.indexOf(name);
+
+      const required = ['name','code','price'];
+      for (const r of required) {
+        if (col(r) === -1) { showToast('Missing column: ' + r); return; }
+      }
+
+      let added = 0, skipped = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const vals = parseCSVLine(lines[i]);
+        const get = (key) => (col(key) !== -1 ? (vals[col(key)] || '').trim() : '');
+
+        const name = get('name');
+        const code = get('code');
+        const price = parseInt(get('price'));
+        if (!name || !code || !price) { skipped++; continue; }
+
+        const id = parseInt(get('id')) || (Date.now() % 100000 + i);
+        const category = (get('category') || 'WOMAN').toUpperCase() === 'MAN' ? 'MAN' : 'WOMAN';
+        const color = get('color') || '';
+
+        // Check for duplicate code
+        const exists = PRODUCTS.findIndex(p => p.code === code);
+        if (exists !== -1) {
+          // Update existing
+          PRODUCTS[exists] = { ...PRODUCTS[exists], name, code, id, price, category, color };
+        } else {
+          PRODUCTS.push({ id, code, name, price, color, brand: 'D.A.T.E.', category, image: null });
+        }
+        added++;
+      }
+
+      renderAdminProducts();
+      renderProducts(PRODUCTS);
+      input.value = '';
+      showToast(`✓ Imported ${added} products${skipped ? ', ' + skipped + ' skipped' : ''}`);
+    } catch(err) {
+      showToast('CSV error: ' + err.message);
+      console.error(err);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVLine(line) {
+  // Handles quoted fields with commas inside
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+
+// ===================== GOOGLE SHEETS SYNC =====================
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwn86s42Sew8XaQDWHO0gYJLt6hPsbtBoB6kSpts_H24S400aQa2xFTX8Ce2QzVvgbF/exec';
+let syncTimeout = null;
+let isSyncing = false;
+
+function showSyncStatus(msg, color) {
+  let el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color || '#888';
+}
+
+async function saveToSheets() {
+  if (isSyncing) return;
+  isSyncing = true;
+  showSyncStatus('⟳ Saving...', '#aaa');
+  try {
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'saveOrders', orders: allOrders }),
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      showSyncStatus('✓ Saved to Sheets', '#7ab87a');
+      setTimeout(() => showSyncStatus('', ''), 3000);
+    } else {
+      showSyncStatus('⚠ Save failed', '#e07070');
+    }
+  } catch(e) {
+    showSyncStatus('⚠ Offline — data in browser only', '#e07070');
+    console.error('Sheets save error:', e);
+  }
+  isSyncing = false;
+}
+
+function scheduleSave() {
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(saveToSheets, 1000);
+}
+
+async function loadFromSheets() {
+  showSyncStatus('⟳ Loading orders...', '#aaa');
+  try {
+    const res = await fetch(SHEETS_URL + '?action=loadOrders');
+    const data = await res.json();
+    if (data.status === 'ok' && Array.isArray(data.orders)) {
+      allOrders = data.orders;
+      showSyncStatus('✓ ' + allOrders.length + ' orders loaded', '#7ab87a');
+      setTimeout(() => showSyncStatus('', ''), 3000);
+    } else {
+      showSyncStatus('⚠ Could not load orders', '#e07070');
+    }
+  } catch(e) {
+    showSyncStatus('⚠ Offline — showing local data', '#e07070');
+    console.error('Sheets load error:', e);
+  }
+}
+
+// ===================== INIT =====================
+renderProducts(PRODUCTS);
+// App starts at login screen — enterApp() is called after PIN
+</script>
+</body>
+</html>
